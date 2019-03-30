@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace就是与此文件对应的Dao接口的全路径-->
+<mapper namespace="com.lab.dao.UserDao" >
+    <!--如下type的User就是mybatis-config.xml中配置的user-->
+    <resultMap id="BaseResultMap" type="com.lab.pojo.User" >
+        <id column="user_id" property="id" jdbcType="INTEGER" />
+        <result column="user_name" property="name" jdbcType="VARCHAR" />
+        <result column="user_age" property="age" jdbcType="INTEGER" />
+        <result column="user_username" property="username" jdbcType="VARCHAR" />
+        <result column="user_password" property="password" jdbcType="VARCHAR" />
+        <result column="user_permission" property="permission" jdbcType="VARCHAR" />
+        <result column="user_phonenum" property="phonenum" jdbcType="INTEGER" />
+    </resultMap>
+    <!--自己配置的查询表所有数据的sql-->
+    <select id="selectAllUser" resultType="com.lab.pojo.User">
+        select * FROM user;
+    </select>
+
+    <select id="selectListUser" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select * FROM user
+        <if test="_parameter != null">
+            limit #{_parameter,jdbcType=INTEGER},6 #查前6行
+        </if>
+    </select>
+
+    <select id="selectSearchUser" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select * FROM user
+        where user_id like '%${_parameter}%' or user_username   like '%${_parameter}%'or user_phonenum  like '%${_parameter}%'
+    </select>
+
+
+    <sql id="Base_Column_List" >
+        user_id, user_name, user_age, user_username, user_password, user_permission, user_phonenum
+    </sql>
+    <!--根据id查找user-->
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select
+        <include refid="Base_Column_List" />
+        from user
+        where user_id = #{_parameter,jdbcType=INTEGER}
+    </select>
+
+    <!--根据用户名和密码查找user-->
+    <select id="selectByusnpsw" resultMap="BaseResultMap" >
+        select
+        <include refid="Base_Column_List" />
+        from user
+        where user_username = #{0,jdbcType=VARCHAR} and user_password = #{1,jdbcType=VARCHAR}
+    </select>
+
+    <!--根据用户名查找user-->
+    <select id="selectByusn" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from user
+        where user_username = #{_parameter,jdbcType=VARCHAR}
+    </select>
+
+
+    <!--根据id删除user-->
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+        delete from user
+        where ID = #{id,jdbcType=INTEGER}
+    </delete>
+    <!--根据传入的user插入一个新user-->
+    <insert id="insert" parameterType="User" >
+        insert into user (user_id, user_name, user_age, user_username, user_password, user_phonenum
+        )
+        values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{age,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},#{phonenum,jdbcType=INTEGER}
+               )
+    </insert>
+
+    <insert id="insertSelective" parameterType="User" >
+        insert into user
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                ID,
+            </if>
+            <if test="name != null" >
+                Name,
+            </if>
+            <if test="age != null" >
+                Age,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="name != null" >
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="age != null" >
+                #{age,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="User" >
+        update user
+        <set >
+            <if test="name != null" >
+                Name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="age != null" >
+                Age = #{age,jdbcType=INTEGER},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=INTEGER}
+    </update>
+    <!--根据id更新user-->
+    <update id="updateByPrimaryKey" parameterType="User" >
+        update user
+        <set >
+                user_name = #{name,jdbcType=VARCHAR},
+                user_age = #{age,jdbcType=INTEGER},
+            <if test="username != null" >
+                user_username = #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null" >
+                user_password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="permission != null" >
+                user_permission = #{permission,jdbcType=VARCHAR},
+            </if>
+                user_phonenum = #{phonenum,jdbcType=INTEGER},
+        </set>
+        where user_id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

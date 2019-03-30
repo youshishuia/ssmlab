@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace就是与此文件对应的Dao接口的全路径-->
+<mapper namespace="com.lab.dao.LabDao" >
+    <!--如下type的User就是mybatis-config.xml中配置的user-->
+    <resultMap id="LabResultMap" type="com.lab.pojo.Lab" >
+        <id column="lab_id" property="id" jdbcType="INTEGER" />
+        <result column="lab_name" property="name" jdbcType="VARCHAR" />
+        <result column="lab_address" property="address" jdbcType="VARCHAR" />
+        <result column="lab_size" property="size" jdbcType="INTEGER" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        lab_id, lab_name, lab_address, lab_size
+    </sql>
+    <!--根据实验室名查找lab-->
+    <select id="selectBylan" resultMap="LabResultMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from lab
+        where lab_name = #{name,jdbcType=VARCHAR}
+    </select>
+    <!--根据实验室地址查找lab-->
+    <select id="selectByladdress" resultMap="LabResultMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from lab<!--严重注意，不是from user记得改lab，查错查了一个半钟-->
+        where lab_address = #{address,jdbcType=VARCHAR}
+    </select>
+    <!--自己配置的查询实验室表所有数据的sql-->
+    <select id="selectAllLab" resultMap="LabResultMap" parameterType="java.lang.Integer">
+    select * FROM lab
+    <if test="_parameter != null">
+        limit #{_parameter,jdbcType=INTEGER},6 #查前6行
+    </if>
+</select>
+    <select id="selectSearchLab" resultMap="LabResultMap" parameterType="java.lang.String">
+        select * FROM lab
+        where lab_id like '%${_parameter}%' or lab_name   like '%${_parameter}%'or lab_address  like '%${_parameter}%' or lab_size like '%${_parameter}%'
+    </select>
+
+
+</mapper>

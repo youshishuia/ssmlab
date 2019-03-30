@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace就是与此文件对应的Dao接口的全路径-->
+<mapper namespace="com.lab.dao.FormDao" >
+    <!--如下type的User就是mybatis-config.xml中配置的user-->
+    <resultMap id="FormResultMap" type="com.lab.pojo.Form" >
+        <id column="form_id" property="id" jdbcType="INTEGER" />
+        <result column="form_userid" property="userid" jdbcType="INTEGER" />
+        <result column="form_labid" property="labid" jdbcType="INTEGER" />
+        <result column="form_applicationtime" property="applicationtime" jdbcType="TIMESTAMP" />
+        <result column="form_appointment" property="appointment" jdbcType="TIMESTAMP" />
+        <result column="form_appointmentend" property="appointmentend" jdbcType="TIMESTAMP" />
+        <result column="form_pass" property="pass" jdbcType="VARCHAR" />
+    </resultMap>
+    <resultMap id="UserFormViewResultMap" type="com.lab.pojo.FormView" >
+        <id column="form_id" property="formid" jdbcType="INTEGER" />
+        <result column="form_userid" property="userid" jdbcType="INTEGER" />
+        <result column="form_labid" property="labid" jdbcType="INTEGER" />
+        <result column="user_username" property="username" jdbcType="VARCHAR" />
+        <result column="lab_name" property="labname" jdbcType="VARCHAR" />
+        <result column="lab_address" property="address" jdbcType="VARCHAR" />
+        <result column="form_applicationtime" property="applicationtime" jdbcType="TIMESTAMP" />
+        <result column="form_appointment" property="appointment" jdbcType="TIMESTAMP" />
+        <result column="form_appointmentend" property="appointmentend" jdbcType="TIMESTAMP" />
+        <result column="form_pass" property="pass" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        form_id, form_userid, form_labid, form_applicationtime, form_appointment, form_appointmentend, form_pass
+    </sql>
+    <!--根据实验室id查找form-->
+    <select id="selectBylabid" resultMap="FormResultMap" parameterType="java.lang.Integer" >
+        select
+        <include refid="Base_Column_List" />
+        from form
+        where form_labid = #{labid,jdbcType=INTEGER}
+    </select>
+    <!--自己配置的查询实验室表所有数据的sql-->
+    <select id="selectAllForm" resultMap="FormResultMap">
+        select * FROM form;
+    </select>
+    <insert id="insert" parameterType="com.lab.pojo.Form" >
+        insert into form (form_id, form_userid, form_labid, form_appointment, form_appointmentend
+        )
+        values (#{id,jdbcType=INTEGER}, #{userid,jdbcType=INTEGER}, #{labid,jdbcType=INTEGER}, #{appointment,jdbcType=TIMESTAMP}, #{appointmentend,jdbcType=TIMESTAMP}
+               )
+    </insert>
+    <!--自己配置的查询用户视图预约表所有数据的sql-->
+    <select id="selectUserFormView" resultMap="UserFormViewResultMap" parameterType="java.lang.Integer">
+        select
+        f.form_id,l.lab_address,f.form_appointment,f.form_appointmentend,f.form_pass
+        FROM form f, user u ,lab l where f.form_userid = u.user_id and u.user_id =  #{_parameter,jdbcType=INTEGER} and f.form_labid = l.lab_id;
+    </select>
+
+    <select id="selectFormView" resultMap="UserFormViewResultMap" parameterType="java.lang.Integer">
+        select
+            *
+        FROM form f, user u ,lab l where f.form_userid = u.user_id and f.form_labid = l.lab_id
+        <if test="_parameter != null">
+            limit #{_parameter,jdbcType=INTEGER},6 #查前6行
+        </if>
+    </select>
+    <select id="selectSearchFW" resultMap="UserFormViewResultMap" parameterType="java.lang.String">
+        select
+               *
+        FROM  form f LEFT JOIN  USER u ON f.form_userid = u.user_id
+                     LEFT JOIN  lab  l ON f.form_labid = l.lab_id
+        where form_id like '%${_parameter}%' or user_name   like '%${_parameter}%'or lab_name  like '%${_parameter}%' or lab_address like '%${_parameter}%'
+       or form_applicationtime like '%${_parameter}%'or form_appointment like '%${_parameter}%'or form_appointmentend like '%${_parameter}%'or form_pass like '%${_parameter}%'
+    </select>
+
+
+
+    <!--根据id删除预约-->
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+        delete from form
+        where form_id = #{_parameter,jdbcType=INTEGER}
+    </delete>
+
+</mapper>
